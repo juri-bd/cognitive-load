@@ -4,10 +4,73 @@ import { useState } from "react";
 
 type AnalysisState = "upload" | "loading" | "results";
 
+type Severity = "Low" | "Moderate" | "High";
+
+type AnalysisResult = {
+  pageName: string;
+  overallScore: number;
+  severity: Severity;
+  summary: string;
+  dimensions: {
+    visualClutter: number;
+    contourDensity: number;
+    colorVariability: number;
+    figureGroundContrast: number;
+    layoutRegularity: number;
+  };
+};
+
 export default function Home() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(
+    null
+  );
   const [analysisState, setAnalysisState] =
     useState<AnalysisState>("upload");
+
+  const dimensionScores = [
+    {
+      title: "Visual clutter",
+      score: analysisResult?.dimensions.visualClutter ?? 0,
+      whatItMeans:
+        "This estimates overall visual busyness using edge density. Interfaces with many lines, borders, text strokes, icons, and image details usually score higher.",
+      howToFix:
+        "Reduce unnecessary borders, simplify dense regions, increase spacing between groups, and remove repeated visual noise.",
+    },
+    {
+      title: "Contour density",
+      score: analysisResult?.dimensions.contourDensity ?? 0,
+      whatItMeans:
+        "This estimates how many strong object boundaries and outlines appear in the screenshot.",
+      howToFix:
+        "Reduce excessive separators, outlines, box borders, and competing shape boundaries where they do not help structure the page.",
+    },
+    {
+      title: "Color variability",
+      score: analysisResult?.dimensions.colorVariability ?? 0,
+      whatItMeans:
+        "This estimates how much competing color information appears in the interface.",
+      howToFix:
+        "Use fewer accent colors, keep secondary colors muted, and reserve high-saturation colors for important actions or status messages.",
+    },
+    {
+      title: "Figure-ground contrast",
+      score: analysisResult?.dimensions.figureGroundContrast ?? 0,
+      whatItMeans:
+        "This estimates how strongly foreground content separates from the background through local luminance differences.",
+      howToFix:
+        "Improve weak text/background separation, but avoid making too many regions visually intense at the same time.",
+    },
+    {
+      title: "Layout regularity",
+      score: analysisResult?.dimensions.layoutRegularity ?? 0,
+      whatItMeans:
+        "This estimates how irregular the visual structure is. Higher scores suggest less predictable alignment or spacing patterns.",
+      howToFix:
+        "Use clearer grids, repeat spacing patterns, align related elements, and make rows or sections more visually consistent.",
+    },
+  ];
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -16,18 +79,35 @@ export default function Home() {
 
     const imageUrl = URL.createObjectURL(file);
     setImagePreview(imageUrl);
+    setSelectedFile(file);
   }
 
-  function handleAnalyze() {
+  async function handleAnalyze() {
+    if (!selectedFile) return;
+
     setAnalysisState("loading");
+
+    const formData = new FormData();
+    formData.append("image", selectedFile);
+
+    const response = await fetch("/api/analyze", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    setAnalysisResult(data);
 
     setTimeout(() => {
       setAnalysisState("results");
-    }, 3000);
+    }, 1000);
   }
 
   function resetAnalysis() {
     setImagePreview(null);
+    setSelectedFile(null);
+    setAnalysisResult(null);
     setAnalysisState("upload");
   }
 
@@ -42,15 +122,15 @@ export default function Home() {
           </h2>
 
           <p className="mb-10 text-center text-[#a8a29a]">
-            Usually takes 3 to 5 seconds
+            Calculating rule-based visual complexity metrics
           </p>
 
           <div className="space-y-4">
-            <LoadingStep text="Measuring element density..." />
-            <LoadingStep text="Evaluating visual hierarchy..." />
-            <LoadingStep text="Analyzing color entropy..." />
-            <LoadingStep text="Scanning text complexity..." />
-            <LoadingStep text="Generating recommendations..." />
+            <LoadingStep text="Estimating visual clutter..." />
+            <LoadingStep text="Measuring contour density..." />
+            <LoadingStep text="Analyzing color variability..." />
+            <LoadingStep text="Calculating figure-ground contrast..." />
+            <LoadingStep text="Estimating layout regularity..." />
           </div>
         </div>
       </main>
@@ -65,12 +145,14 @@ export default function Home() {
             <div className="mb-8 flex items-start justify-between gap-6">
               <div>
                 <p className="mb-3 text-sm uppercase tracking-[0.25em] text-[#a8a29a]">
-                  Overall cognitive load
+                  Estimated visual complexity
                 </p>
 
                 <h2 className="text-3xl font-bold">
-                  Amazon product page{" "}
-                  <SeverityBadge severity="Moderate" />
+                  {analysisResult?.pageName ?? "Uploaded screenshot"}{" "}
+                  <SeverityBadge
+                    severity={analysisResult?.severity ?? "Moderate"}
+                  />
                 </h2>
               </div>
 
@@ -86,29 +168,33 @@ export default function Home() {
               <div className="flex flex-col items-center">
                 <div className="relative flex h-40 w-40 items-center justify-center rounded-full border-[14px] border-[#d99b25]">
                   <div className="text-center">
-                    <p className="text-5xl font-bold">62</p>
+                    <p className="text-5xl font-bold">
+                      {analysisResult?.overallScore ?? 0}
+                    </p>
                     <p className="text-sm text-[#a8a29a]">/100</p>
                   </div>
                 </div>
 
                 <p className="mt-4 font-semibold text-[#d99b25]">
-                  Moderate load
+                  {analysisResult?.severity ?? "Moderate"} complexity
                 </p>
               </div>
 
               <div>
                 <p className="mb-6 max-w-2xl text-lg leading-8 text-[#c7c1b8]">
-                  This interface places above-average demands on working memory,
-                  primarily because of dense layout structure, competing visual
-                  focal points, and high text volume.
+                  {analysisResult?.summary ??
+                    "This screenshot has been analyzed using rule-based visual complexity metrics."}
                 </p>
 
                 <div className="grid gap-4 md:grid-cols-5">
-                  <ScoreCard title="Element density" score={81} level="High" />
-                  <ScoreCard title="Color entropy" score={58} level="Moderate" />
-                  <ScoreCard title="Visual hierarchy" score={52} level="Moderate" />
-                  <ScoreCard title="Contrast" score={34} level="Low" />
-                  <ScoreCard title="Text density" score={76} level="High" />
+                  {dimensionScores.map((dimension) => (
+                    <ScoreCard
+                      key={dimension.title}
+                      title={dimension.title}
+                      score={dimension.score}
+                      level={getSeverityFromScore(dimension.score)}
+                    />
+                  ))}
                 </div>
               </div>
             </div>
@@ -126,45 +212,16 @@ export default function Home() {
             </div>
 
             <div className="space-y-5">
-              <FindingCard
-                title="Element density"
-                score={81}
-                severity="High"
-                whatItMeans="The screen contains too many visible interface elements at once, forcing users to evaluate many possible actions simultaneously."
-                howToFix="Group related actions, hide secondary controls, increase whitespace, and make the primary action visually dominant."
-              />
-
-              <FindingCard
-                title="Text density"
-                score={76}
-                severity="High"
-                whatItMeans="Large blocks of text make scanning slower and increase the amount of information users must hold in working memory."
-                howToFix="Shorten copy, break long sections into smaller chunks, use clearer headings, and reduce repeated explanations."
-              />
-
-              <FindingCard
-                title="Color entropy"
-                score={58}
-                severity="Moderate"
-                whatItMeans="Several colors compete for attention, which makes it harder to understand what is important."
-                howToFix="Limit accent colors, reserve strong colors for key actions, and use a more consistent visual system."
-              />
-
-              <FindingCard
-                title="Visual hierarchy"
-                score={52}
-                severity="Moderate"
-                whatItMeans="The page does not have one obvious focal point, so attention is distributed across several competing areas."
-                howToFix="Increase the size, contrast, and spacing around the primary action or most important content."
-              />
-
-              <FindingCard
-                title="Contrast"
-                score={34}
-                severity="Low"
-                whatItMeans="Most key content is readable, but some secondary text may be too subtle for comfortable scanning."
-                howToFix="Increase contrast on small text, reduce grey-on-grey combinations, and test important labels against WCAG contrast standards."
-              />
+              {dimensionScores.map((dimension) => (
+                <FindingCard
+                  key={dimension.title}
+                  title={dimension.title}
+                  score={dimension.score}
+                  severity={getSeverityFromScore(dimension.score)}
+                  whatItMeans={dimension.whatItMeans}
+                  howToFix={dimension.howToFix}
+                />
+              ))}
             </div>
           </div>
 
@@ -185,16 +242,16 @@ export default function Home() {
     <main className="min-h-screen bg-[#1c1c1a] px-6 py-16 text-[#f4f1ea]">
       <section className="mx-auto max-w-4xl rounded-xl border border-[#4a4a45] bg-[#2b2b28] px-8 py-14 text-center">
         <p className="mb-4 text-sm font-semibold uppercase tracking-[0.25em] text-[#a8a29a]">
-          Cognitive Load Estimator
+          Visual Complexity Estimator
         </p>
 
         <h1 className="mb-6 text-4xl font-bold tracking-tight">
-          How hard is your UI to look at?
+          How visually complex is your UI?
         </h1>
 
         <p className="mx-auto mb-12 max-w-xl text-lg leading-8 text-[#c7c1b8]">
-          Upload any screenshot and get an evidence-based cognitive load score
-          across five dimensions.
+          Upload any screenshot and get a rule-based visual complexity score
+          across five research-grounded dimensions.
         </p>
 
         <label className="mx-auto mb-6 flex h-44 max-w-2xl cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-[#6b6b64] bg-[#242421] transition hover:border-[#8ab4f8]">
@@ -253,7 +310,7 @@ function ScoreCard({
 }: {
   title: string;
   score: number;
-  level: "Low" | "Moderate" | "High";
+  level: Severity;
 }) {
   return (
     <div className="rounded-lg border border-[#3f3f3a] bg-[#242421] p-4">
@@ -276,7 +333,7 @@ function FindingCard({
 }: {
   title: string;
   score: number;
-  severity: "Low" | "Moderate" | "High";
+  severity: Severity;
   whatItMeans: string;
   howToFix: string;
 }) {
@@ -300,7 +357,7 @@ function FindingCard({
 
         <div>
           <p className="mb-2 text-sm font-semibold uppercase tracking-[0.15em] text-[#a8a29a]">
-            How to fix it
+            How to reduce it
           </p>
           <p className="leading-7 text-[#c7c1b8]">{howToFix}</p>
         </div>
@@ -309,11 +366,7 @@ function FindingCard({
   );
 }
 
-function SeverityBadge({
-  severity,
-}: {
-  severity: "Low" | "Moderate" | "High";
-}) {
+function SeverityBadge({ severity }: { severity: Severity }) {
   const classes = {
     Low: "bg-[#dff5d1] text-[#315d1c]",
     Moderate: "bg-[#fff0d5] text-[#8a5514]",
@@ -329,7 +382,13 @@ function SeverityBadge({
   );
 }
 
-function getScoreColor(level: "Low" | "Moderate" | "High") {
+function getSeverityFromScore(score: number): Severity {
+  if (score >= 70) return "High";
+  if (score >= 40) return "Moderate";
+  return "Low";
+}
+
+function getScoreColor(level: Severity) {
   const classes = {
     Low: "text-3xl font-bold text-[#6aaa38]",
     Moderate: "text-3xl font-bold text-[#d99b25]",
