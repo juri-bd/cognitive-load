@@ -1,0 +1,302 @@
+[
+  {
+    "batchId": "001",
+    "least": "001",
+    "middle": "006",
+    "most": "003"
+  },
+  {
+    "batchId": "002",
+    "least": "008",
+    "middle": "014",
+    "most": "002"
+  },
+  {
+    "batchId": "003",
+    "least": "029",
+    "middle": "020",
+    "most": "004"
+  },
+  {
+    "batchId": "004",
+    "least": "011",
+    "middle": "013",
+    "most": "028"
+  },
+  {
+    "batchId": "005",
+    "least": "024",
+    "middle": "021",
+    "most": "052"
+  },
+  {
+    "batchId": "006",
+    "least": "032",
+    "middle": "055",
+    "most": "057"
+  },
+  {
+    "batchId": "007",
+    "least": "039",
+    "middle": "034",
+    "most": "065"
+  },
+  {
+    "batchId": "008",
+    "least": "041",
+    "middle": "050",
+    "most": "066"
+  },
+  {
+    "batchId": "009",
+    "least": "037",
+    "middle": "044",
+    "most": "067"
+  },
+  {
+    "batchId": "010",
+    "least": "048",
+    "middle": "053",
+    "most": "068"
+  },
+  {
+    "batchId": "011",
+    "least": "038",
+    "middle": "022",
+    "most": "069"
+  },
+  {
+    "batchId": "012",
+    "least": "035",
+    "middle": "043",
+    "most": "070"
+  },
+  {
+    "batchId": "013",
+    "least": "074",
+    "middle": "071",
+    "most": "073"
+  },
+  {
+    "batchId": "014",
+    "least": "075",
+    "middle": "094",
+    "most": "091"
+  },
+  {
+    "batchId": "015",
+    "least": "090",
+    "middle": "077",
+    "most": "095"
+  },
+  {
+    "batchId": "016",
+    "least": "016",
+    "middle": "096",
+    "most": "017"
+  },
+  {
+    "batchId": "017",
+    "least": "031",
+    "middle": "098",
+    "most": "040"
+  },
+  {
+    "batchId": "018",
+    "least": "042",
+    "middle": "046",
+    "most": "100"
+  },
+  {
+    "batchId": "019",
+    "least": "023",
+    "middle": "012",
+    "most": "063"
+  },
+  {
+    "batchId": "020",
+    "least": "018",
+    "middle": "049",
+    "most": "064"
+  },
+  {
+    "batchId": "021",
+    "least": "039",
+    "middle": "003",
+    "most": "057"
+  },
+  {
+    "batchId": "022",
+    "least": "001",
+    "middle": "024",
+    "most": "066"
+  },
+  {
+    "batchId": "023",
+    "least": "011",
+    "middle": "068",
+    "most": "020"
+  },
+  {
+    "batchId": "024",
+    "least": "032",
+    "middle": "050",
+    "most": "095"
+  },
+  {
+    "batchId": "025",
+    "least": "074",
+    "middle": "043",
+    "most": "069"
+  },
+  {
+    "batchId": "026",
+    "least": "041",
+    "middle": "055",
+    "most": "070"
+  },
+  {
+    "batchId": "027",
+    "least": "037",
+    "middle": "098",
+    "most": "040"
+  },
+  {
+    "batchId": "028",
+    "least": "048",
+    "middle": "053",
+    "most": "063"
+  },
+  {
+    "batchId": "029",
+    "least": "022",
+    "middle": "044",
+    "most": "067"
+  },
+  {
+    "batchId": "030",
+    "least": "035",
+    "middle": "052",
+    "most": "100"
+  },
+  {
+    "batchId": "031",
+    "least": "038",
+    "middle": "002",
+    "most": "064"
+  },
+  {
+    "batchId": "032",
+    "least": "023",
+    "middle": "004",
+    "most": "065"
+  },
+  {
+    "batchId": "033",
+    "least": "046",
+    "middle": "093",
+    "most": "021"
+  },
+  {
+    "batchId": "034",
+    "least": "049",
+    "middle": "034",
+    "most": "094"
+  },
+  {
+    "batchId": "035",
+    "least": "018",
+    "middle": "096",
+    "most": "075"
+  },
+  {
+    "batchId": "036",
+    "least": "077",
+    "middle": "012",
+    "most": "057"
+  },
+  {
+    "batchId": "037",
+    "least": "031",
+    "middle": "069",
+    "most": "055"
+  },
+  {
+    "batchId": "038",
+    "least": "039",
+    "middle": "042",
+    "most": "063"
+  },
+  {
+    "batchId": "039",
+    "least": "024",
+    "middle": "098",
+    "most": "003"
+  },
+  {
+    "batchId": "040",
+    "least": "001",
+    "middle": "020",
+    "most": "095"
+  },
+  {
+    "batchId": "041",
+    "least": "053",
+    "middle": "011",
+    "most": "068"
+  },
+  {
+    "batchId": "042",
+    "least": "032",
+    "middle": "070",
+    "most": "044"
+  },
+  {
+    "batchId": "043",
+    "least": "050",
+    "middle": "074",
+    "most": "066"
+  },
+  {
+    "batchId": "044",
+    "least": "041",
+    "middle": "023",
+    "most": "064"
+  },
+  {
+    "batchId": "045",
+    "least": "037",
+    "middle": "093",
+    "most": "040"
+  },
+  {
+    "batchId": "046",
+    "least": "048",
+    "middle": "052",
+    "most": "067"
+  },
+  {
+    "batchId": "047",
+    "least": "022",
+    "middle": "096",
+    "most": "043"
+  },
+  {
+    "batchId": "048",
+    "least": "035",
+    "middle": "055",
+    "most": "065"
+  },
+  {
+    "batchId": "049",
+    "least": "024",
+    "middle": "002",
+    "most": "100"
+  },
+  {
+    "batchId": "050",
+    "least": "038",
+    "middle": "004",
+    "most": "094"
+  }
+]

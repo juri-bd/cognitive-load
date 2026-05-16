@@ -1,8 +1,12 @@
+import crypto from "crypto";
 import { NextResponse } from "next/server";
 import { analyzeScreenshot } from "@/lib/analyzeScreenshot";
 
+const cache = new Map<string, unknown>();
+
 export async function POST(request: Request) {
   const formData = await request.formData();
+
   const file = formData.get("image") as File | null;
 
   if (!file) {
@@ -12,10 +16,34 @@ export async function POST(request: Request) {
     );
   }
 
-  const arrayBuffer = await file.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
+  const includeHeatmap = formData.get("heatmap") === "true";
 
-  const result = await analyzeScreenshot(buffer, file.name);
+  const buffer = Buffer.from(await file.arrayBuffer());
 
-  return NextResponse.json(result);
+  const hash = crypto
+    .createHash("sha256")
+    .update(buffer)
+    .digest("hex");
+
+  const cached = cache.get(hash);
+
+  if (cached) {
+    return NextResponse.json(cached, {
+      headers: {
+        "Cache-Control": "public, max-age=3600",
+      },
+    });
+  }
+
+  const result = await analyzeScreenshot(buffer, file.name, {
+    includeHeatmap,
+  });
+
+  cache.set(hash, result);
+
+  return NextResponse.json(result, {
+    headers: {
+      "Cache-Control": "public, max-age=3600",
+    },
+  });
 }

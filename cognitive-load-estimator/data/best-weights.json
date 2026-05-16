@@ -1,0 +1,13 @@
+{
+  "accuracy": 0.7246376811594203,
+  "correct": 100,
+  "total": 138,
+  "averageMargin": 3.6982780362555605,
+  "weights": {
+    "visualClutter": 0.0686,
+    "contourDensity": 0.0271,
+    "colorVariability": 0.0271,
+    "figureGroundContrast": 0.7522,
+    "layoutRegularity": 0.1251
+  }
+}

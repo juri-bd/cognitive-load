@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "benchmark": "tsx scripts/runBenchmark.ts",
+    "optimize": "tsx scripts/optimizeWeights.ts"
   },
   "dependencies": {
     "next": "16.2.6",
@@ -23,6 +25,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "tailwindcss": "^4",
+    "tsx": "^4.22.0",
     "typescript": "^5"
   }
 }
