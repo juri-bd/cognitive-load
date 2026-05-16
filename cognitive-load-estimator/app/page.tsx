@@ -18,6 +18,9 @@ type AnalysisResult = {
     figureGroundContrast: number;
     layoutRegularity: number;
   };
+  heatmaps: {
+    friction: string;
+  };
 };
 
 export default function Home() {
@@ -26,8 +29,8 @@ export default function Home() {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(
     null
   );
-  const [analysisState, setAnalysisState] =
-    useState<AnalysisState>("upload");
+  const [analysisState, setAnalysisState] = useState<AnalysisState>("upload");
+  const [urlInput, setUrlInput] = useState("");
 
   const dimensionScores = [
     {
@@ -72,7 +75,7 @@ export default function Home() {
     },
   ];
 
-  function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
 
     if (!file) return;
@@ -80,15 +83,16 @@ export default function Home() {
     const imageUrl = URL.createObjectURL(file);
     setImagePreview(imageUrl);
     setSelectedFile(file);
+    setUrlInput("");
+
+    await analyzeImage(file);
   }
 
-  async function handleAnalyze() {
-    if (!selectedFile) return;
-
+  async function analyzeImage(file: File) {
     setAnalysisState("loading");
 
     const formData = new FormData();
-    formData.append("image", selectedFile);
+    formData.append("image", file);
 
     const response = await fetch("/api/analyze", {
       method: "POST",
@@ -103,6 +107,32 @@ export default function Home() {
       setAnalysisState("results");
     }, 1000);
   }
+
+  async function analyzeUrl() {
+    if (!urlInput.trim()) return;
+
+    setImagePreview(null);
+    setSelectedFile(null);
+    setAnalysisState("loading");
+
+    const response = await fetch("/api/analyze-url", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        url: urlInput,
+      }),
+    });
+
+  const data = await response.json();
+
+  setAnalysisResult(data);
+
+  setTimeout(() => {
+    setAnalysisState("results");
+  }, 1000);
+}
 
   function resetAnalysis() {
     setImagePreview(null);
@@ -138,105 +168,132 @@ export default function Home() {
   }
 
   if (analysisState === "results") {
-    return (
-      <main className="min-h-screen bg-[#1c1c1a] px-6 py-16 text-[#f4f1ea]">
-        <section className="mx-auto max-w-5xl">
-          <div className="mb-8 rounded-xl border border-[#4a4a45] bg-[#2b2b28] p-10">
-            <div className="mb-8 flex items-start justify-between gap-6">
-              <div>
-                <p className="mb-3 text-sm uppercase tracking-[0.25em] text-[#a8a29a]">
-                  Estimated visual complexity
-                </p>
+  return (
+    <main className="min-h-screen bg-[#1c1c1a] px-6 py-16 text-[#f4f1ea]">
+      <section className="mx-auto max-w-5xl">
+        <div className="mb-8 rounded-xl border border-[#4a4a45] bg-[#2b2b28] p-10">
+          <div className="mb-8 flex items-start justify-between gap-6">
+            <div>
+              <p className="mb-3 text-sm uppercase tracking-[0.25em] text-[#a8a29a]">
+                Estimated visual complexity
+              </p>
 
-                <h2 className="text-3xl font-bold">
-                  {analysisResult?.pageName ?? "Uploaded screenshot"}{" "}
-                  <SeverityBadge
-                    severity={analysisResult?.severity ?? "Moderate"}
-                  />
-                </h2>
-              </div>
-
-              <button
-                onClick={resetAnalysis}
-                className="rounded-lg border border-[#5a5a53] px-4 py-2 text-sm font-medium text-[#ddd8cf] transition hover:bg-[#3a3a35]"
-              >
-                Analyze another
-              </button>
-            </div>
-
-            <div className="mb-10 grid gap-8 md:grid-cols-[180px_1fr]">
-              <div className="flex flex-col items-center">
-                <div className="relative flex h-40 w-40 items-center justify-center rounded-full border-[14px] border-[#d99b25]">
-                  <div className="text-center">
-                    <p className="text-5xl font-bold">
-                      {analysisResult?.overallScore ?? 0}
-                    </p>
-                    <p className="text-sm text-[#a8a29a]">/100</p>
-                  </div>
-                </div>
-
-                <p className="mt-4 font-semibold text-[#d99b25]">
-                  {analysisResult?.severity ?? "Moderate"} complexity
-                </p>
-              </div>
-
-              <div>
-                <p className="mb-6 max-w-2xl text-lg leading-8 text-[#c7c1b8]">
-                  {analysisResult?.summary ??
-                    "This screenshot has been analyzed using rule-based visual complexity metrics."}
-                </p>
-
-                <div className="grid gap-4 md:grid-cols-5">
-                  {dimensionScores.map((dimension) => (
-                    <ScoreCard
-                      key={dimension.title}
-                      title={dimension.title}
-                      score={dimension.score}
-                      level={getSeverityFromScore(dimension.score)}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-[#4a4a45] bg-[#2b2b28] p-10">
-            <div className="mb-8 flex items-center justify-between">
-              <h2 className="text-2xl font-bold">Detailed findings</h2>
-
-              <div className="flex gap-2 text-sm">
-                <SeverityBadge severity="High" />
-                <SeverityBadge severity="Moderate" />
-                <SeverityBadge severity="Low" />
-              </div>
-            </div>
-
-            <div className="space-y-5">
-              {dimensionScores.map((dimension) => (
-                <FindingCard
-                  key={dimension.title}
-                  title={dimension.title}
-                  score={dimension.score}
-                  severity={getSeverityFromScore(dimension.score)}
-                  whatItMeans={dimension.whatItMeans}
-                  howToFix={dimension.howToFix}
+              <h2 className="text-3xl font-bold">
+                {analysisResult?.pageName ?? "Uploaded screenshot"}{" "}
+                <SeverityBadge
+                  severity={analysisResult?.severity ?? "Moderate"}
                 />
-              ))}
+              </h2>
             </div>
-          </div>
 
-          <div className="mt-8 text-center">
             <button
               onClick={resetAnalysis}
-              className="rounded-lg bg-[#f4f1ea] px-6 py-3 font-semibold text-[#1c1c1a]"
+              className="rounded-lg border border-[#5a5a53] px-4 py-2 text-sm font-medium text-[#ddd8cf] transition hover:bg-[#3a3a35]"
             >
-              Analyze another screenshot
+              Analyze another
             </button>
           </div>
-        </section>
-      </main>
-    );
-  }
+
+          <div className="mb-10 grid gap-8 md:grid-cols-[180px_1fr]">
+            <div className="flex flex-col items-center">
+              <div className="relative flex h-40 w-40 items-center justify-center rounded-full border-[14px] border-[#d99b25]">
+                <div className="text-center">
+                  <p className="text-5xl font-bold">
+                    {analysisResult?.overallScore ?? 0}
+                  </p>
+                  <p className="text-sm text-[#a8a29a]">/100</p>
+                </div>
+              </div>
+
+              <p className="mt-4 font-semibold text-[#d99b25]">
+                {analysisResult?.severity ?? "Moderate"} complexity
+              </p>
+            </div>
+
+            <div>
+              <p className="mb-6 max-w-2xl text-lg leading-8 text-[#c7c1b8]">
+                {analysisResult?.summary ??
+                  "This screenshot has been analyzed using rule-based visual complexity metrics."}
+              </p>
+
+              <div className="grid gap-4 md:grid-cols-5">
+                {dimensionScores.map((dimension) => (
+                  <ScoreCard
+                    key={dimension.title}
+                    title={dimension.title}
+                    score={dimension.score}
+                    level={getSeverityFromScore(dimension.score)}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {analysisResult?.heatmaps.friction && (
+          <div className="mb-8 rounded-xl border border-[#4a4a45] bg-[#2b2b28] p-10">
+            <div className="mb-6">
+              <p className="mb-3 text-sm uppercase tracking-[0.25em] text-[#a8a29a]">
+                Visual friction heatmap
+              </p>
+
+              <h2 className="text-2xl font-bold">
+                Where the interface is busiest
+              </h2>
+
+              <p className="mt-3 max-w-2xl text-[#c7c1b8]">
+                Red areas indicate regions where edge density, color variation, contrast,
+                and occupied space combine into higher visual friction.
+              </p>
+            </div>
+
+            <div className="overflow-hidden rounded-xl border border-[#4a4a45] bg-[#242421]">
+              <img
+                src={analysisResult.heatmaps.friction}
+                alt="Visual clutter heatmap"
+                className="w-full object-contain"
+              />
+            </div>
+          </div>
+        )}
+
+        <div className="rounded-xl border border-[#4a4a45] bg-[#2b2b28] p-10">
+          <div className="mb-8 flex items-center justify-between">
+            <h2 className="text-2xl font-bold">Detailed findings</h2>
+
+            <div className="flex gap-2 text-sm">
+              <SeverityBadge severity="High" />
+              <SeverityBadge severity="Moderate" />
+              <SeverityBadge severity="Low" />
+            </div>
+          </div>
+
+          <div className="space-y-5">
+            {dimensionScores.map((dimension) => (
+              <FindingCard
+                key={dimension.title}
+                title={dimension.title}
+                score={dimension.score}
+                severity={getSeverityFromScore(dimension.score)}
+                whatItMeans={dimension.whatItMeans}
+                howToFix={dimension.howToFix}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-8 text-center">
+          <button
+            onClick={resetAnalysis}
+            className="rounded-lg bg-[#f4f1ea] px-6 py-3 font-semibold text-[#1c1c1a]"
+          >
+            Analyze another screenshot
+          </button>
+        </div>
+      </section>
+    </main>
+  );
+}
 
   return (
     <main className="min-h-screen bg-[#1c1c1a] px-6 py-16 text-[#f4f1ea]">
@@ -283,13 +340,29 @@ export default function Home() {
           </div>
         )}
 
-        <button
-          onClick={handleAnalyze}
-          disabled={!imagePreview}
-          className="rounded-lg bg-[#f4f1ea] px-6 py-3 font-semibold text-[#1c1c1a] disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          Analyze screenshot
-        </button>
+        <div className="mx-auto mt-8 max-w-2xl">
+          <p className="mb-4 text-sm text-[#918b83]">
+            Image uploads are analyzed automatically.
+          </p>
+
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <input
+              type="url"
+              value={urlInput}
+              onChange={(event) => setUrlInput(event.target.value)}
+              placeholder="Or paste a website URL"
+              className="flex-1 rounded-lg border border-[#4a4a45] bg-[#242421] px-4 py-3 text-[#f4f1ea] outline-none placeholder:text-[#918b83]"
+            />
+
+            <button
+              onClick={analyzeUrl}
+              disabled={!urlInput.trim()}
+              className="rounded-lg bg-[#f4f1ea] px-6 py-3 font-semibold text-[#1c1c1a] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Analyze URL
+            </button>
+          </div>
+        </div>
       </section>
     </main>
   );
